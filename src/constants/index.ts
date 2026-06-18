@@ -81,8 +81,10 @@ export const NAV_LINKS = {
   ],
   doctor: [
     { href: "/doctor", label: "Dashboard" },
-    { href: "/doctor/appointments", label: "Appointments" },
-    { href: "/doctor/queue", label: "Queue" },
+    { href: "/doctor/patients", label: "আজকের রোগী" },
+    { href: "/doctor/schedule", label: "আমার সময়সূচী" },
+    { href: "/doctor/income", label: "আয়ের হিসাব" },
+    { href: "/doctor/profile", label: "প্রোফাইল" },
   ],
   receptionist: [
     { href: "/receptionist", label: "Dashboard" },
@@ -93,7 +95,8 @@ export const NAV_LINKS = {
   ],
   patient: [
     { href: "/patient", label: "Dashboard" },
-    { href: "/patient/appointments", label: "Appointments" },
-    { href: "/patient/payments", label: "Payments" },
+    { href: "/patient/appointments", label: "আমার অ্যাপয়েন্টমেন্ট" },
+    { href: "/patient/doctors", label: "ডাক্তার খুঁজুন" },
+    { href: "/patient/profile", label: "আমার প্রোফাইল" },
   ],
 } as const;
