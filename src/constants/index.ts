@@ -86,9 +86,10 @@ export const NAV_LINKS = {
   ],
   receptionist: [
     { href: "/receptionist", label: "Dashboard" },
-    { href: "/receptionist/appointments", label: "Appointments" },
-    { href: "/receptionist/payments", label: "Payments" },
-    { href: "/receptionist/queue", label: "Queue" },
+    { href: "/receptionist", label: "সিরিয়াল বুক করুন" },
+    { href: "/receptionist/queue", label: "Queue Manager" },
+    { href: "/receptionist/patients", label: "রোগী খুঁজুন" },
+    { href: "/receptionist/reports", label: "আজকের রিপোর্ট" },
   ],
   patient: [
     { href: "/patient", label: "Dashboard" },
