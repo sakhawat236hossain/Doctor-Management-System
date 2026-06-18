@@ -4,49 +4,44 @@ import { NextResponse } from "next/server";
 
 const { auth } = NextAuth(authConfig);
 
-const protectedRoutes: Record<string, string[]> = {
+const roleBasedRoutes: Record<string, string[]> = {
   "/admin": ["admin"],
   "/doctor": ["doctor"],
   "/receptionist": ["receptionist"],
   "/patient": ["patient"],
 };
 
+const roleHomePaths: Record<string, string> = {
+  admin: "/admin",
+  doctor: "/doctor",
+  receptionist: "/receptionist",
+  patient: "/patient",
+};
+
 export default auth((req) => {
   const { pathname } = req.nextUrl;
   const session = req.auth;
 
-  const protectedPath = Object.keys(protectedRoutes).find((path) =>
+  const matchedRoute = Object.keys(roleBasedRoutes).find((path) =>
     pathname.startsWith(path)
   );
 
-  if (protectedPath) {
+  if (matchedRoute) {
     if (!session?.user) {
       const loginUrl = new URL("/login", req.url);
       loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
     }
 
-    const allowedRoles = protectedRoutes[protectedPath];
+    const allowedRoles = roleBasedRoutes[matchedRoute];
     if (!allowedRoles.includes(session.user.role)) {
-      const rolePaths: Record<string, string> = {
-        admin: "/admin",
-        doctor: "/doctor",
-        receptionist: "/receptionist",
-        patient: "/patient",
-      };
-      const redirectPath = rolePaths[session.user.role] || "/";
+      const redirectPath = roleHomePaths[session.user.role] || "/";
       return NextResponse.redirect(new URL(redirectPath, req.url));
     }
   }
 
   if (session?.user && (pathname === "/login" || pathname === "/register")) {
-    const rolePaths: Record<string, string> = {
-      admin: "/admin",
-      doctor: "/doctor",
-      receptionist: "/receptionist",
-      patient: "/patient",
-    };
-    const redirectPath = rolePaths[session.user.role] || "/";
+    const redirectPath = roleHomePaths[session.user.role] || "/";
     return NextResponse.redirect(new URL(redirectPath, req.url));
   }
 

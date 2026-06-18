@@ -6,48 +6,64 @@ export const ROLES = {
 } as const;
 
 export const APPOINTMENT_STATUS = {
-  SCHEDULED: "scheduled",
-  IN_PROGRESS: "in-progress",
+  PENDING: "pending",
+  CONFIRMED: "confirmed",
+  SERVING: "serving",
   COMPLETED: "completed",
   CANCELLED: "cancelled",
+  NO_SHOW: "no-show",
 } as const;
 
 export const APPOINTMENT_TYPE = {
-  VISIT: "visit",
+  NEW: "new",
   FOLLOW_UP: "follow-up",
 } as const;
 
 export const PAYMENT_STATUS = {
   PAID: "paid",
   DUE: "due",
+  REFUNDED: "refunded",
 } as const;
 
 export const PAYMENT_METHOD = {
   CASH: "cash",
+  BKASH: "bkash",
+  NAGAD: "nagad",
+  ROCKET: "rocket",
   CARD: "card",
-  ONLINE: "online",
-  INSURANCE: "insurance",
 } as const;
 
 export const DOCTOR_STATUS = {
   AVAILABLE: "available",
   UNAVAILABLE: "unavailable",
+  ON_LEAVE: "on-leave",
 } as const;
 
 export const QUEUE_STATUS = {
-  ACTIVE: "active",
+  OPEN: "open",
   PAUSED: "paused",
-  COMPLETED: "completed",
+  CLOSED: "closed",
 } as const;
 
 export const DAYS = {
-  MONDAY: "monday",
-  TUESDAY: "tuesday",
-  WEDNESDAY: "wednesday",
-  THURSDAY: "thursday",
-  FRIDAY: "friday",
-  SATURDAY: "saturday",
-  SUNDAY: "sunday",
+  SAT: "Sat",
+  SUN: "Sun",
+  MON: "Mon",
+  TUE: "Tue",
+  WED: "Wed",
+  THU: "Thu",
+  FRI: "Fri",
+} as const;
+
+export const BLOOD_GROUPS = {
+  A_POSITIVE: "A+",
+  A_NEGATIVE: "A-",
+  B_POSITIVE: "B+",
+  B_NEGATIVE: "B-",
+  O_POSITIVE: "O+",
+  O_NEGATIVE: "O-",
+  AB_POSITIVE: "AB+",
+  AB_NEGATIVE: "AB-",
 } as const;
 
 export const GENDER = {

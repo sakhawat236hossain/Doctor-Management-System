@@ -17,13 +17,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function Navbar() {
-  const { user } = useAuth();
+  const { session } = useAuth();
+  const user = session?.user;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const initials = user?.name
     ? user.name
         .split(" ")
-        .map((n) => n[0])
+        .map((n: string) => n[0])
         .join("")
         .toUpperCase()
         .slice(0, 2)

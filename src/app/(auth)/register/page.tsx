@@ -1,83 +1,77 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Activity, Loader2, Upload, UserCircle } from "lucide-react";
+import { z } from "zod";
+import { Activity, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { uploadImageToCloudinary } from "@/lib/cloudinary";
+
+const registerSchema = z
+  .object({
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    email: z.string().email("Invalid email address"),
+    phone: z.string().min(10, "Phone must be at least 10 characters"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(6, "Confirm password is required"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+type RegisterFormData = z.input<typeof registerSchema>;
 
 export default function RegisterPage() {
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [profileImage, setProfileImage] = useState<string>("");
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegisterFormData>({
     name: "",
     email: "",
-    password: "",
     phone: "",
-    dateOfBirth: "",
-    gender: "male",
-    bloodGroup: "O+",
-    address: "",
-    emergencyContact: "",
+    password: "",
+    confirmPassword: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: keyof RegisterFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image size must be less than 5MB");
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      const url = await uploadImageToCloudinary(file);
-      if (url) {
-        setProfileImage(url);
-        toast.success("Image uploaded successfully");
-      }
-    } catch {
-      toast.error("Failed to upload image");
-    } finally {
-      setIsUploading(false);
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
+    const parsed = registerSchema.safeParse(formData);
+    if (!parsed.success) {
+      const fieldErrors: Record<string, string> = {};
+      parsed.error.errors.forEach((err) => {
+        const key = err.path[0] as string;
+        if (!fieldErrors[key]) fieldErrors[key] = err.message;
+      });
+      setErrors(fieldErrors);
+      toast.error(parsed.error.errors[0].message);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const payload = {
-        ...formData,
-        role: "patient",
-        profileImage,
-      };
-
-      const response = await fetch("/api/register", {
+      const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(parsed.data),
       });
 
       const data = await response.json();
@@ -87,7 +81,7 @@ export default function RegisterPage() {
         return;
       }
 
-      toast.success("Account created successfully!");
+      toast.success("Account created successfully! Please sign in.");
       router.push("/login");
     } catch {
       toast.error("An error occurred during registration");
@@ -109,50 +103,6 @@ export default function RegisterPage() {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
-            <div className="flex flex-col items-center gap-3">
-              <div
-                className="relative h-24 w-24 cursor-pointer overflow-hidden rounded-full border-2 border-dashed border-muted-foreground/30 hover:border-primary transition-colors"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                {profileImage ? (
-                  <img
-                    src={profileImage}
-                    alt="Profile"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full flex-col items-center justify-center text-muted-foreground">
-                    {isUploading ? (
-                      <Loader2 className="h-6 w-6 animate-spin" />
-                    ) : (
-                      <>
-                        <UserCircle className="h-8 w-8" />
-                        <span className="text-xs mt-1">Upload</span>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-                disabled={isUploading || isLoading}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading || isLoading}
-              >
-                <Upload className="mr-2 h-3 w-3" />
-                {profileImage ? "Change Photo" : "Upload Photo"}
-              </Button>
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input
@@ -160,10 +110,11 @@ export default function RegisterPage() {
                 placeholder="John Doe"
                 value={formData.name}
                 onChange={(e) => handleChange("name", e.target.value)}
-                required
                 disabled={isLoading}
               />
+              {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -172,23 +123,11 @@ export default function RegisterPage() {
                 placeholder="you@example.com"
                 value={formData.email}
                 onChange={(e) => handleChange("email", e.target.value)}
-                required
                 disabled={isLoading}
               />
+              {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Min. 6 characters"
-                value={formData.password}
-                onChange={(e) => handleChange("password", e.target.value)}
-                required
-                minLength={6}
-                disabled={isLoading}
-              />
-            </div>
+
             <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
               <Input
@@ -197,76 +136,42 @@ export default function RegisterPage() {
                 placeholder="+880 1XXX XXXXXX"
                 value={formData.phone}
                 onChange={(e) => handleChange("phone", e.target.value)}
-                required
                 disabled={isLoading}
               />
+              {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="dateOfBirth">Date of Birth</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
-                id="dateOfBirth"
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => handleChange("dateOfBirth", e.target.value)}
-                required
+                id="password"
+                type="password"
+                placeholder="Min. 6 characters"
+                value={formData.password}
+                onChange={(e) => handleChange("password", e.target.value)}
                 disabled={isLoading}
               />
+              {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
             </div>
+
             <div className="space-y-2">
-              <Label>Gender</Label>
-              <Select value={formData.gender} onValueChange={(v) => handleChange("gender", v)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Blood Group</Label>
-              <Select value={formData.bloodGroup} onValueChange={(v) => handleChange("bloodGroup", v)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="A+">A+</SelectItem>
-                  <SelectItem value="A-">A-</SelectItem>
-                  <SelectItem value="B+">B+</SelectItem>
-                  <SelectItem value="B-">B-</SelectItem>
-                  <SelectItem value="AB+">AB+</SelectItem>
-                  <SelectItem value="AB-">AB-</SelectItem>
-                  <SelectItem value="O+">O+</SelectItem>
-                  <SelectItem value="O-">O-</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
               <Input
-                id="address"
-                placeholder="Your address"
-                value={formData.address}
-                onChange={(e) => handleChange("address", e.target.value)}
+                id="confirmPassword"
+                type="password"
+                placeholder="Re-enter your password"
+                value={formData.confirmPassword}
+                onChange={(e) => handleChange("confirmPassword", e.target.value)}
                 disabled={isLoading}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="emergencyContact">Emergency Contact</Label>
-              <Input
-                id="emergencyContact"
-                type="tel"
-                placeholder="Emergency contact number"
-                value={formData.emergencyContact}
-                onChange={(e) => handleChange("emergencyContact", e.target.value)}
-                disabled={isLoading}
-              />
+              {errors.confirmPassword && (
+                <p className="text-xs text-destructive">{errors.confirmPassword}</p>
+              )}
             </div>
           </CardContent>
+
           <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full" disabled={isLoading || isUploading}>
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

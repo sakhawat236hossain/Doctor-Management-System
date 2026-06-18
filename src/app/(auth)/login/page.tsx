@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { getSession, signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Activity, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -10,6 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+
+const roleHomePaths: Record<string, string> = {
+  admin: "/admin",
+  doctor: "/doctor",
+  receptionist: "/receptionist",
+  patient: "/patient",
+};
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,16 +41,12 @@ export default function LoginPage() {
       }
 
       toast.success("Welcome back!");
-      const session = await getSession();
-      const rolePaths: Record<string, string> = {
-        admin: "/admin",
-        doctor: "/doctor",
-        receptionist: "/receptionist",
-        patient: "/patient",
-      };
-      const redirectPath = session?.user?.role
-        ? rolePaths[session.user.role] || "/"
-        : "/";
+
+      const sessionRes = await fetch("/api/auth/session");
+      const session = await sessionRes.json();
+      const role = session?.user?.role as string | undefined;
+      const redirectPath = role ? (roleHomePaths[role] || "/") : "/";
+
       router.push(redirectPath);
       router.refresh();
     } catch {
@@ -105,7 +108,7 @@ export default function LoginPage() {
             <p className="text-center text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
               <Link href="/register" className="text-primary hover:underline">
-                Register
+                Register as Patient
               </Link>
             </p>
           </CardFooter>

@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db";
-import User from "@/models/User";
+import { UserModel } from "@/models/User";
 import { authConfig } from "@/lib/auth.config";
 import type { UserRole } from "@/types";
 
@@ -13,7 +13,6 @@ declare module "next-auth" {
       name: string;
       email: string;
       role: UserRole;
-      phone: string;
     };
   }
 
@@ -22,7 +21,14 @@ declare module "next-auth" {
     name: string;
     email: string;
     role: UserRole;
-    phone: string;
+  }
+}
+
+declare module "@auth/core/jwt" {
+  interface JWT {
+    userId: string;
+    name: string;
+    role: UserRole;
   }
 }
 
@@ -42,7 +48,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         await connectDB();
 
-        const user = await User.findOne({ email: credentials.email as string });
+        const user = await UserModel.findOne({
+          email: credentials.email as string,
+        }).select("+password");
 
         if (!user || !user.isActive || !user.password) {
           return null;
@@ -62,7 +70,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           name: user.name,
           email: user.email,
           role: user.role,
-          phone: user.phone,
         };
       },
     }),

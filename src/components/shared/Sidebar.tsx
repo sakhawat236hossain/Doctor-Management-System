@@ -9,11 +9,12 @@ import type { UserRole } from "@/types";
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { session, role } = useAuth();
+  const user = session?.user;
 
-  if (!user) return null;
+  if (!user || !role) return null;
 
-  const links = NAV_LINKS[user.role as UserRole] || [];
+  const links = NAV_LINKS[role as UserRole] || [];
 
   return (
     <aside className="hidden w-64 shrink-0 border-r bg-muted/30 md:block">
