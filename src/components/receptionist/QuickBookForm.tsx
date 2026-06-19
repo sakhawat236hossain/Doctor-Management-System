@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { PrintToken } from "@/components/receptionist/PrintToken";
+import { useT } from "@/lib/i18n";
 import type { IDoctor, IUser, IPatient } from "@/types";
 
 interface DoctorWithUser extends Omit<IDoctor, "userId"> {
@@ -34,6 +35,7 @@ interface BookingResult {
 }
 
 export function QuickBookForm() {
+  const t = useT();
   // Patient search
   const [phoneInput, setPhoneInput] = useState("");
   const [patientResults, setPatientResults] = useState<PatientWithUser[]>([]);
@@ -164,15 +166,15 @@ export function QuickBookForm() {
           <div className="mx-auto mb-4 h-14 w-14 rounded-full bg-green-100 flex items-center justify-center">
             <CheckCircle2 className="h-8 w-8 text-green-600" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-1">
-            বুকিং সম্পন্ন!
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+            {t("appointment.bookingComplete")}
           </h3>
-          <p className="text-sm text-gray-500 mb-6">
-            Appointment booked successfully
+          <p className="text-sm text-gray-500 dark:text-slate-400 mb-6">
+            {t("appointment.bookingSuccessMsg")}
           </p>
 
-          <div className="bg-blue-50 rounded-xl p-5 mb-6">
-            <p className="text-sm text-blue-700 mb-1">সিরিয়াল নম্বর</p>
+          <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-5 mb-6">
+            <p className="text-sm text-blue-700 dark:text-blue-300 mb-1">{t("appointment.serialNumber")}</p>
             <p className="text-5xl font-bold text-blue-600">
               #{result.serialNumber}
             </p>
@@ -194,7 +196,7 @@ export function QuickBookForm() {
           </div>
 
           <Button onClick={resetForm} variant="outline">
-            নতুন বুকিং করুন
+            {t("token.newBookingBtn")}
           </Button>
         </CardContent>
       </Card>
@@ -203,24 +205,24 @@ export function QuickBookForm() {
 
   // ━━━ BOOKING FORM ━━━
   return (
-    <Card>
+    <Card className="dark:bg-slate-800 dark:border-slate-700">
       <CardHeader className="pb-4">
-        <CardTitle className="text-lg flex items-center gap-2">
+        <CardTitle className="text-lg flex items-center gap-2 dark:text-white">
           <Calendar className="h-5 w-5 text-blue-600" />
-          সিরিয়াল বুক করুন
+          {t("receptionist.quickBook")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
         {/* Step 1: Patient Search */}
         <div>
-          <Label className="text-sm font-medium text-gray-700 flex items-center gap-1.5 mb-2">
+          <Label className="text-sm font-medium text-gray-700 dark:text-slate-200 flex items-center gap-1.5 mb-2">
             <Phone className="h-3.5 w-3.5" />
-            Patient Phone
+            {t("patient.patientPhone")}
           </Label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Enter phone number to search..."
+              placeholder={t("patient.searchPhonePlaceholder")}
               value={phoneInput}
               onChange={(e) => handlePhoneChange(e.target.value)}
               className="pl-10"
@@ -229,20 +231,20 @@ export function QuickBookForm() {
 
           {/* Search Results */}
           {searching && (
-            <p className="text-xs text-gray-500 mt-2">Searching...</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400 mt-2">{t("patient.searching")}</p>
           )}
 
           {selectedPatient && (
-            <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+            <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center justify-between">
               <div>
-                <p className="font-medium text-sm text-gray-900">
+                <p className="font-medium text-sm text-gray-900 dark:text-white">
                   {selectedPatient.userId?.name}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-slate-400">
                   {selectedPatient.userId?.phone} · {selectedPatient.userId?.email}
                 </p>
               </div>
-              <Badge variant="success">Found</Badge>
+              <Badge variant="success">{t("common.found")}</Badge>
             </div>
           )}
 
@@ -251,9 +253,9 @@ export function QuickBookForm() {
             !selectedPatient &&
             patientResults.length === 0 &&
             !newPatientMode && (
-              <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                <p className="text-sm text-amber-800 font-medium mb-2">
-                  কোনো রোগী পাওয়া যায়নি
+              <div className="mt-2 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <p className="text-sm text-amber-800 dark:text-amber-300 font-medium mb-2">
+                  {t("patient.noPatientFound")}
                 </p>
                 <Button
                   size="sm"
@@ -264,7 +266,7 @@ export function QuickBookForm() {
                   }}
                 >
                   <UserPlus className="mr-1 h-3.5 w-3.5" />
-                  নতুন রোগী হিসেবে যোগ করুন
+                  {t("patient.addNewPatient")}
                 </Button>
               </div>
             )}
@@ -282,10 +284,10 @@ export function QuickBookForm() {
                     setPhoneInput(p.userId?.phone || "");
                     setNewPatientMode(false);
                   }}
-                  className="w-full text-left px-3 py-2 hover:bg-blue-50 transition-colors"
+                  className="w-full text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
                 >
-                  <p className="font-medium text-sm">{p.userId?.name}</p>
-                  <p className="text-xs text-gray-500">{p.userId?.phone}</p>
+                  <p className="font-medium text-sm dark:text-white">{p.userId?.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400">{p.userId?.phone}</p>
                 </button>
               ))}
             </div>
@@ -293,10 +295,10 @@ export function QuickBookForm() {
 
           {/* New Patient Inline Form */}
           {newPatientMode && (
-            <div className="mt-2 p-3 bg-gray-50 border rounded-lg space-y-3">
+            <div className="mt-2 p-3 bg-gray-50 dark:bg-slate-700 border dark:border-slate-600 rounded-lg space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">
-                  নতুন রোগীর তথ্য
+                <span className="text-sm font-medium text-gray-700 dark:text-slate-200">
+                  {t("patient.newPatientInfo")}
                 </span>
                 <button
                   type="button"
@@ -307,12 +309,12 @@ export function QuickBookForm() {
                 </button>
               </div>
               <Input
-                placeholder="Patient name"
+                placeholder={t("common.name")}
                 value={newPatientName}
                 onChange={(e) => setNewPatientName(e.target.value)}
               />
               <Input
-                placeholder="Phone"
+                placeholder={t("common.phone")}
                 value={newPatientPhone}
                 onChange={(e) => setNewPatientPhone(e.target.value)}
               />
@@ -324,16 +326,16 @@ export function QuickBookForm() {
 
         {/* Step 2: Doctor Selection */}
         <div>
-          <Label className="text-sm font-medium text-gray-700 flex items-center gap-1.5 mb-2">
+          <Label className="text-sm font-medium text-gray-700 dark:text-slate-200 flex items-center gap-1.5 mb-2">
             <Stethoscope className="h-3.5 w-3.5" />
-            Doctor
+            {t("roles.doctor")}
           </Label>
           <select
             value={selectedDoctorId}
             onChange={(e) => setSelectedDoctorId(e.target.value)}
-            className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full h-10 rounded-md border border-input bg-background dark:bg-slate-700 dark:border-slate-600 dark:text-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
-            <option value="">-- Select Doctor --</option>
+            <option value="">{t("token.selectDoctor")}</option>
             {doctors.map((d) => (
               <option key={d._id} value={d._id}>
                 {d.userId?.name} — {d.speciality} (৳{d.visitFee})
@@ -344,8 +346,8 @@ export function QuickBookForm() {
 
         {/* Step 3: Visit Type */}
         <div>
-          <Label className="text-sm font-medium text-gray-700 mb-2 block">
-            Visit Type
+          <Label className="text-sm font-medium text-gray-700 dark:text-slate-200 mb-2 block">
+            {t("token.visitType")}
           </Label>
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -353,12 +355,12 @@ export function QuickBookForm() {
               onClick={() => setVisitType("new")}
               className={`p-3 rounded-lg border-2 text-center transition-colors ${
                 visitType === "new"
-                  ? "border-blue-600 bg-blue-50"
-                  : "border-gray-200 hover:border-gray-300"
+                  ? "border-blue-600 bg-blue-50 dark:bg-blue-900/30"
+                  : "border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500"
               }`}
             >
-              <p className="font-medium text-sm">New Visit</p>
-              <p className="text-base font-bold text-blue-600 mt-0.5">
+              <p className="font-medium text-sm dark:text-white">{t("appointment.newVisit")}</p>
+              <p className="text-base font-bold text-blue-600 dark:text-blue-400 mt-0.5">
                 ৳{selectedDoctor?.visitFee || "—"}
               </p>
             </button>
@@ -367,12 +369,12 @@ export function QuickBookForm() {
               onClick={() => setVisitType("follow-up")}
               className={`p-3 rounded-lg border-2 text-center transition-colors ${
                 visitType === "follow-up"
-                  ? "border-blue-600 bg-blue-50"
-                  : "border-gray-200 hover:border-gray-300"
+                  ? "border-blue-600 bg-blue-50 dark:bg-blue-900/30"
+                  : "border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500"
               }`}
             >
-              <p className="font-medium text-sm">Follow-up</p>
-              <p className="text-base font-bold text-blue-600 mt-0.5">
+              <p className="font-medium text-sm dark:text-white">{t("appointment.followUp")}</p>
+              <p className="text-base font-bold text-blue-600 dark:text-blue-400 mt-0.5">
                 ৳{selectedDoctor?.followUpFee || "—"}
               </p>
             </button>
@@ -381,8 +383,8 @@ export function QuickBookForm() {
 
         {/* Step 4: Date */}
         <div>
-          <Label className="text-sm font-medium text-gray-700 mb-1 block">
-            Date
+          <Label className="text-sm font-medium text-gray-700 dark:text-slate-200 mb-1 block">
+            {t("common.date")}
           </Label>
           <Input
             type="date"
@@ -396,8 +398,8 @@ export function QuickBookForm() {
 
         {/* Fee summary */}
         <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Total Fee</span>
-          <span className="text-xl font-bold text-gray-900">৳{fee}</span>
+          <span className="text-sm text-gray-600 dark:text-slate-400">{t("token.totalFee")}</span>
+          <span className="text-xl font-bold text-gray-900 dark:text-white">৳{fee}</span>
         </div>
 
         {/* Submit */}
@@ -414,12 +416,12 @@ export function QuickBookForm() {
           {submitting ? (
             <>
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
-              Booking...
+              {t("appointment.booking")}
             </>
           ) : (
             <>
               <CheckCircle2 className="mr-2 h-4 w-4" />
-              বুকিং নিশ্চিত করুন
+              {t("appointment.confirmBooking")}
             </>
           )}
         </Button>

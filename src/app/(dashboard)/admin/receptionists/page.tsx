@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Loading } from "@/components/shared/Loading";
+import { useT } from "@/lib/i18n";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,7 @@ function generatePassword(): string {
 }
 
 export default function AdminReceptionistsPage() {
+  const t = useT();
   const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -71,7 +73,7 @@ export default function AdminReceptionistsPage() {
       return json;
     },
     onSuccess: () => {
-      toast.success("রিসেপশনিস্ট সফলভাবে যোগ হয়েছে");
+      toast.success(t("receptionist.addSuccess"));
       queryClient.invalidateQueries({ queryKey: ["admin-receptionists"] });
       setModalOpen(false);
     },
@@ -90,7 +92,7 @@ export default function AdminReceptionistsPage() {
       return json;
     },
     onSuccess: () => {
-      toast.success(target?.isActive ? "রিসেপশনিস্ট নিষ্ক্রিয় করা হয়েছে" : "রিসেপশনিস্ট সক্রিয় করা হয়েছে");
+      toast.success(target?.isActive ? t("receptionist.deactivateSuccess") : t("receptionist.activateSuccess"));
       queryClient.invalidateQueries({ queryKey: ["admin-receptionists"] });
       setConfirmOpen(false);
       setTarget(null);
@@ -118,48 +120,48 @@ export default function AdminReceptionistsPage() {
     });
   }
 
-  if (isLoading) return <Loading message="রিসেপশনিস্টদের তথ্য লোড হচ্ছে..." />;
+  if (isLoading) return <Loading message={t("receptionist.loadingReceptionists")} />;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">রিসেপশনিস্ট ব্যবস্থাপনা</h1>
-          <p className="text-muted-foreground">রিসেপশনিস্ট যোগ ও পরিচালনা করুন</p>
+          <h1 className="text-3xl font-bold dark:text-white">{t("receptionist.management")}</h1>
+          <p className="text-muted-foreground dark:text-slate-400">{t("receptionist.manageReceptionists")}</p>
         </div>
         <Button onClick={openModal}>
           <Plus className="mr-2 h-4 w-4" />
-          রিসেপশনিস্ট যোগ করুন
+          {t("receptionist.addReceptionist")}
         </Button>
       </div>
 
-      <Card>
+      <Card className="dark:bg-slate-800 dark:border-slate-700">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="border-b bg-muted/50">
+              <thead className="border-b bg-muted/50 dark:border-slate-700">
                 <tr>
-                  <th className="py-3 pl-4 text-left font-medium">নাম</th>
-                  <th className="py-3 text-left font-medium">ইমেইল</th>
-                  <th className="py-3 text-left font-medium">ফোন</th>
-                  <th className="py-3 text-left font-medium">যোগদানের তারিখ</th>
-                  <th className="py-3 text-center font-medium">স্ট্যাটাস</th>
-                  <th className="py-3 pr-4 text-right font-medium">অ্যাকশন</th>
+                  <th className="py-3 pl-4 text-left font-medium dark:text-slate-300">{t("common.name")}</th>
+                  <th className="py-3 text-left font-medium dark:text-slate-300">{t("common.email")}</th>
+                  <th className="py-3 text-left font-medium dark:text-slate-300">{t("common.phone")}</th>
+                  <th className="py-3 text-left font-medium dark:text-slate-300">{t("receptionist.joiningDate")}</th>
+                  <th className="py-3 text-center font-medium dark:text-slate-300">{t("common.status")}</th>
+                  <th className="py-3 pr-4 text-right font-medium dark:text-slate-300">{t("common.action")}</th>
                 </tr>
               </thead>
               <tbody>
                 {(!receptionists || receptionists.length === 0) ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-muted-foreground">
-                      কোনো রিসেপশনিস্ট পাওয়া যায়নি
+                    <td colSpan={6} className="py-8 text-center text-muted-foreground dark:text-slate-400">
+                      {t("receptionist.noReceptionists")}
                     </td>
                   </tr>
                 ) : (
                   receptionists.map((r) => (
-                    <tr key={r._id} className="border-b last:border-0 hover:bg-muted/30">
-                      <td className="py-3 pl-4 font-medium">{r.name}</td>
-                      <td className="py-3">{r.email}</td>
-                      <td className="py-3">{r.phone}</td>
+                    <tr key={r._id} className="border-b last:border-0 hover:bg-muted/30 dark:border-slate-700 dark:hover:bg-slate-700/50">
+                      <td className="py-3 pl-4 font-medium dark:text-white">{r.name}</td>
+                      <td className="py-3 dark:text-slate-300">{r.email}</td>
+                      <td className="py-3 dark:text-slate-300">{r.phone}</td>
                       <td className="py-3">
                         {new Date(r.createdAt).toLocaleDateString("bn-BD", {
                           year: "numeric",
@@ -169,7 +171,7 @@ export default function AdminReceptionistsPage() {
                       </td>
                       <td className="py-3 text-center">
                         <Badge variant={r.isActive ? "success" : "secondary"}>
-                          {r.isActive ? "সক্রিয়" : "নিষ্ক্রিয়"}
+                          {r.isActive ? t("receptionist.active") : t("receptionist.inactive")}
                         </Badge>
                       </td>
                       <td className="py-3 pr-4 text-right">
@@ -198,19 +200,19 @@ export default function AdminReceptionistsPage() {
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{target?.isActive ? "নিষ্ক্রিয় করুন" : "সক্রিয় করুন"}</DialogTitle>
+            <DialogTitle className="dark:text-white">{target?.isActive ? t("receptionist.deactivate") : t("receptionist.activate")}</DialogTitle>
             <DialogDescription>
-              আপনি কি নিশ্চিত <strong>{target?.name}</strong> কে {target?.isActive ? "নিষ্ক্রিয়" : "সক্রিয়"} করতে চান?
+              {t("receptionist.deactivateConfirm", { name: target?.name || "", action: target?.isActive ? t("receptionist.deactivate") : t("receptionist.activate") })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)}>বাতিল</Button>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>{t("common.cancel")}</Button>
             <Button
               variant={target?.isActive ? "destructive" : "default"}
               onClick={() => target && toggleMutation.mutate({ userId: target._id, isActive: !target.isActive })}
               disabled={toggleMutation.isPending}
             >
-              {toggleMutation.isPending ? "প্রক্রিয়াধীন..." : target?.isActive ? "নিষ্ক্রিয় করুন" : "সক্রিয় করুন"}
+              {toggleMutation.isPending ? t("common.processing") : target?.isActive ? t("receptionist.deactivate") : t("receptionist.activate")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -220,25 +222,25 @@ export default function AdminReceptionistsPage() {
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>রিসেপশনিস্ট যোগ করুন</DialogTitle>
-            <DialogDescription>নতুন রিসেপশনিস্টের তথ্য পূরণ করুন</DialogDescription>
+            <DialogTitle className="dark:text-white">{t("receptionist.addReceptionist")}</DialogTitle>
+            <DialogDescription>{t("receptionist.addReceptionistDesc")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label>নাম *</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="রিসেপশনিস্টের নাম" />
+              <Label>{t("common.name")} *</Label>
+              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("receptionist.receptionistName")} />
             </div>
             <div>
-              <Label>ইমেইল *</Label>
+              <Label>{t("common.email")} *</Label>
               <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="receptionist@example.com" />
             </div>
             <div>
-              <Label>ফোন *</Label>
+              <Label>{t("common.phone")} *</Label>
               <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="০১XXXXXXXXX" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <Label>পাসওয়ার্ড *</Label>
+                <Label>{t("auth.passwordLabel")} *</Label>
                 <label className="flex items-center gap-1 text-xs text-muted-foreground">
                   <input
                     type="checkbox"
@@ -251,25 +253,25 @@ export default function AdminReceptionistsPage() {
                       })
                     }
                   />
-                  অটো-জেনারেট
+                  {t("doctor.autoPassword")}
                 </label>
               </div>
               <Input
                 type="text"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value, autoPassword: false })}
-                placeholder="পাসওয়ার্ড"
+                placeholder={t("auth.passwordPlaceholder")}
                 readOnly={form.autoPassword}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setModalOpen(false)}>বাতিল</Button>
+            <Button variant="outline" onClick={() => setModalOpen(false)}>{t("common.cancel")}</Button>
             <Button
               onClick={handleSubmit}
               disabled={!form.name || !form.email || !form.phone || !form.password || createMutation.isPending}
             >
-              {createMutation.isPending ? "প্রক্রিয়াধীন..." : "যোগ করুন"}
+              {createMutation.isPending ? t("common.processing") : t("doctor.addUpdate")}
             </Button>
           </DialogFooter>
         </DialogContent>

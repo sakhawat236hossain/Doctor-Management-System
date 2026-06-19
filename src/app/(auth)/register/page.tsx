@@ -6,30 +6,18 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { Activity, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-
-const registerSchema = z
-  .object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
-    email: z.string().email("Invalid email address"),
-    phone: z.string().min(10, "Phone must be at least 10 characters"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string().min(6, "Confirm password is required"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
-type RegisterFormData = z.input<typeof registerSchema>;
+import { SiteSettings } from "@/components/shared/SiteSettings";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const t = useT();
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<RegisterFormData>({
+  const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
@@ -38,7 +26,20 @@ export default function RegisterPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleChange = (field: keyof RegisterFormData, value: string) => {
+  const registerSchema = z
+    .object({
+      name: z.string().min(2, t("auth.nameMinLength")),
+      email: z.string().email(t("auth.invalidEmail")),
+      phone: z.string().min(10, t("auth.phoneMinLength")),
+      password: z.string().min(6, t("auth.passwordMinLength")),
+      confirmPassword: z.string().min(6, t("auth.passwordMinLength")),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("auth.passwordMismatch"),
+      path: ["confirmPassword"],
+    });
+
+  const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => {
@@ -77,92 +78,100 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (!data.success) {
-        toast.error(data.error || "Registration failed");
+        toast.error(data.error || t("auth.registrationFailed"));
         return;
       }
 
-      toast.success("Account created successfully! Please sign in.");
+      toast.success(t("auth.registrationSuccess"));
       router.push("/login");
     } catch {
-      toast.error("An error occurred during registration");
+      toast.error(t("auth.registrationError"));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-8">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-8 dark:bg-slate-900">
+      <div className="absolute top-4 right-4">
+        <SiteSettings />
+      </div>
+      <Card className="w-full max-w-md dark:bg-slate-800 dark:border-slate-700">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex items-center gap-2">
             <Activity className="h-8 w-8 text-primary" />
             <span className="text-2xl font-bold text-primary">MediFlow</span>
           </div>
-          <CardTitle>Create an account</CardTitle>
-          <CardDescription>Register as a patient to access MediFlow</CardDescription>
+          <CardTitle className="dark:text-white">{t("auth.createAccount")}</CardTitle>
+          <CardDescription className="dark:text-slate-400">{t("auth.registerAsPatient")}</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name" className="dark:text-slate-200">{t("auth.fullName")}</Label>
               <Input
                 id="name"
-                placeholder="John Doe"
+                placeholder={t("auth.fullNamePlaceholder")}
                 value={formData.name}
                 onChange={(e) => handleChange("name", e.target.value)}
                 disabled={isLoading}
+                className="dark:bg-slate-700 dark:border-slate-600 dark:text-white dark:placeholder:text-slate-400"
               />
               {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="dark:text-slate-200">{t("auth.emailLabel")}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder={t("auth.emailPlaceholder")}
                 value={formData.email}
                 onChange={(e) => handleChange("email", e.target.value)}
                 disabled={isLoading}
+                className="dark:bg-slate-700 dark:border-slate-600 dark:text-white dark:placeholder:text-slate-400"
               />
               {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
+              <Label htmlFor="phone" className="dark:text-slate-200">{t("auth.phoneLabel")}</Label>
               <Input
                 id="phone"
                 type="tel"
-                placeholder="+880 1XXX XXXXXX"
+                placeholder={t("auth.phonePlaceholder")}
                 value={formData.phone}
                 onChange={(e) => handleChange("phone", e.target.value)}
                 disabled={isLoading}
+                className="dark:bg-slate-700 dark:border-slate-600 dark:text-white dark:placeholder:text-slate-400"
               />
               {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="dark:text-slate-200">{t("auth.passwordLabel")}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Min. 6 characters"
+                placeholder={t("auth.passwordPlaceholder")}
                 value={formData.password}
                 onChange={(e) => handleChange("password", e.target.value)}
                 disabled={isLoading}
+                className="dark:bg-slate-700 dark:border-slate-600 dark:text-white dark:placeholder:text-slate-400"
               />
               {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword" className="dark:text-slate-200">{t("auth.confirmPassword")}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder="Re-enter your password"
+                placeholder={t("auth.confirmPasswordPlaceholder")}
                 value={formData.confirmPassword}
                 onChange={(e) => handleChange("confirmPassword", e.target.value)}
                 disabled={isLoading}
+                className="dark:bg-slate-700 dark:border-slate-600 dark:text-white dark:placeholder:text-slate-400"
               />
               {errors.confirmPassword && (
                 <p className="text-xs text-destructive">{errors.confirmPassword}</p>
@@ -175,16 +184,16 @@ export default function RegisterPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating account...
+                  {t("auth.creatingAccount")}
                 </>
               ) : (
-                "Create Account"
+                t("auth.createAccount")
               )}
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
+            <p className="text-center text-sm text-muted-foreground dark:text-slate-400">
+              {t("auth.alreadyHaveAccount")}{" "}
               <Link href="/login" className="text-primary hover:underline">
-                Sign In
+                {t("auth.signIn")}
               </Link>
             </p>
           </CardFooter>

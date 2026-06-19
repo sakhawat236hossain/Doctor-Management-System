@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Loading } from "@/components/shared/Loading";
+import { useT } from "@/lib/i18n";
 import {
   Dialog,
   DialogContent,
@@ -69,6 +70,7 @@ function generatePassword(): string {
 }
 
 export default function AdminDoctorsPage() {
+  const t = useT();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [specialityFilter, setSpecialityFilter] = useState("");
@@ -111,7 +113,7 @@ export default function AdminDoctorsPage() {
       return json;
     },
     onSuccess: () => {
-      toast.success("ডাক্তার সফলভাবে যোগ হয়েছে");
+      toast.success(t("doctor.addSuccess"));
       queryClient.invalidateQueries({ queryKey: ["admin-doctors"] });
       closeModal();
     },
@@ -131,11 +133,11 @@ export default function AdminDoctorsPage() {
     },
     onSuccess: (_, vars) => {
       if (vars.isActive === false) {
-        toast.success("ডাক্তার নিষ্ক্রিয় করা হয়েছে");
+        toast.success(t("doctor.deactivateSuccess"));
         setConfirmOpen(false);
         setDeactivateTarget(null);
       } else {
-        toast.success("ডাক্তার আপডেট হয়েছে");
+        toast.success(t("doctor.updateSuccess"));
       }
       queryClient.invalidateQueries({ queryKey: ["admin-doctors"] });
       closeModal();
@@ -227,7 +229,7 @@ export default function AdminDoctorsPage() {
     });
   }
 
-  if (isLoading) return <Loading message="ডাক্তারদের তথ্য লোড হচ্ছে..." />;
+  if (isLoading) return <Loading message={t("doctor.loadingDoctors")} />;
 
   const doctors = data?.doctors || [];
   const specialities = data?.specialities || [];
@@ -236,12 +238,12 @@ export default function AdminDoctorsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">ডাক্তার ব্যবস্থাপনা</h1>
-          <p className="text-muted-foreground">সকল ডাক্তার যোগ, সম্পাদনা ও নিষ্ক্রিয় করুন</p>
+          <h1 className="text-3xl font-bold dark:text-white">{t("doctor.management")}</h1>
+          <p className="text-muted-foreground dark:text-slate-400">{t("doctor.manageDoctors")}</p>
         </div>
         <Button onClick={openAddModal}>
           <Plus className="mr-2 h-4 w-4" />
-          ডাক্তার যোগ করুন
+          {t("doctor.addDoctor")}
         </Button>
       </div>
 
@@ -250,7 +252,7 @@ export default function AdminDoctorsPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="ডাক্তারের নাম খুঁজুন..."
+            placeholder={t("doctor.searchDoctorPlaceholder")}
             className="pl-9"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -258,10 +260,10 @@ export default function AdminDoctorsPage() {
         </div>
         <Select value={specialityFilter} onValueChange={setSpecialityFilter}>
           <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="বিশেষজ্ঞতা" />
+            <SelectValue placeholder={t("doctor.speciality")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">সকল বিশেষজ্ঞতা</SelectItem>
+            <SelectItem value="all">{t("doctor.allSpecialities")}</SelectItem>
             {specialities.map((s) => (
               <SelectItem key={s} value={s}>{s}</SelectItem>
             ))}
@@ -270,46 +272,46 @@ export default function AdminDoctorsPage() {
       </div>
 
       {/* Doctors Table */}
-      <Card>
+      <Card className="dark:bg-slate-800 dark:border-slate-700">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="border-b bg-muted/50">
+              <thead className="border-b bg-muted/50 dark:border-slate-700">
                 <tr>
-                  <th className="py-3 pl-4 text-left font-medium">নাম</th>
-                  <th className="py-3 text-left font-medium">বিশেষজ্ঞতা</th>
-                  <th className="py-3 text-left font-medium">স্ট্যাটাস</th>
-                  <th className="py-3 text-right font-medium">ফি</th>
-                  <th className="py-3 text-center font-medium">আজকের রোগী</th>
-                  <th className="py-3 pr-4 text-right font-medium">অ্যাকশন</th>
+                  <th className="py-3 pl-4 text-left font-medium dark:text-slate-300">{t("common.name")}</th>
+                  <th className="py-3 text-left font-medium dark:text-slate-300">{t("doctor.speciality")}</th>
+                  <th className="py-3 text-left font-medium dark:text-slate-300">{t("common.status")}</th>
+                  <th className="py-3 text-right font-medium dark:text-slate-300">{t("common.fee")}</th>
+                  <th className="py-3 text-center font-medium dark:text-slate-300">{t("doctor.todayPatients")}</th>
+                  <th className="py-3 pr-4 text-right font-medium dark:text-slate-300">{t("common.action")}</th>
                 </tr>
               </thead>
               <tbody>
                 {doctors.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-muted-foreground">
-                      কোনো ডাক্তার পাওয়া যায়নি
+                    <td colSpan={6} className="py-8 text-center text-muted-foreground dark:text-slate-400">
+                      {t("doctor.noDoctorFound")}
                     </td>
                   </tr>
                 ) : (
                   doctors.map((doc) => (
-                    <tr key={doc._id} className="border-b last:border-0 hover:bg-muted/30">
+                    <tr key={doc._id} className="border-b last:border-0 hover:bg-muted/30 dark:border-slate-700 dark:hover:bg-slate-700/50">
                       <td className="py-3 pl-4">
                         <div>
-                          <p className="font-medium">{doc.user.name}</p>
-                          <p className="text-xs text-muted-foreground">{doc.user.email}</p>
+                          <p className="font-medium dark:text-white">{doc.user.name}</p>
+                          <p className="text-xs text-muted-foreground dark:text-slate-400">{doc.user.email}</p>
                         </div>
                       </td>
-                      <td className="py-3">{doc.speciality}</td>
+                      <td className="py-3 dark:text-slate-300">{doc.speciality}</td>
                       <td className="py-3">
                         <Badge variant={doc.isActive ? "success" : "secondary"}>
                           {doc.isActive
-                            ? doc.status === "available" ? "সক্রিয়" : doc.status === "on-leave" ? "ছুটিতে" : "অনুপলব্ধ"
-                            : "নিষ্ক্রিয়"}
+                            ? doc.status === "available" ? t("status.available") : doc.status === "on-leave" ? t("status.onLeave") : t("status.unavailable")
+                            : t("common.inactive")}
                         </Badge>
                       </td>
                       <td className="py-3 text-right">৳{doc.visitFee.toLocaleString("bn-BD")}</td>
-                      <td className="py-3 text-center">{doc.todayPatientCount}</td>
+                      <td className="py-3 text-center dark:text-white">{doc.todayPatientCount}</td>
                       <td className="py-3 pr-4 text-right">
                         <div className="flex justify-end gap-2">
                           <Button variant="ghost" size="sm" onClick={() => openEditModal(doc)}>
@@ -343,14 +345,14 @@ export default function AdminDoctorsPage() {
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>ডাক্তার নিষ্ক্রিয় করুন</DialogTitle>
+            <DialogTitle className="dark:text-white">{t("doctor.deactivateDoctor")}</DialogTitle>
             <DialogDescription>
-              আপনি কি নিশ্চিত <strong>{deactivateTarget?.user.name}</strong> কে নিষ্ক্রিয় করতে চান?
-              নিষ্ক্রিয় ডাক্তার নতুন অ্যাপয়েন্টমেন্ট পাবেন না।
+              {t("doctor.deactivateConfirm", { name: deactivateTarget?.user.name || "" })}
+              {t("doctor.deactivateWarning")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)}>বাতিল</Button>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>{t("common.cancel")}</Button>
             <Button
               variant="destructive"
               onClick={() =>
@@ -363,7 +365,7 @@ export default function AdminDoctorsPage() {
               }
               disabled={updateMutation.isPending}
             >
-              {updateMutation.isPending ? "প্রক্রিয়াধীন..." : "নিষ্ক্রিয় করুন"}
+              {updateMutation.isPending ? t("common.processing") : t("receptionist.deactivate")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -373,13 +375,13 @@ export default function AdminDoctorsPage() {
       <Dialog open={modalOpen} onOpenChange={closeModal}>
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle>
-              {editDoctor ? "ডাক্তার সম্পাদনা" : "ডাক্তার যোগ করুন"} — ধাপ {step}/৩
+            <DialogTitle className="dark:text-white">
+              {editDoctor ? t("doctor.editDoctor") : t("doctor.addDoctor")} — {t("doctor.step")} {step}/3
             </DialogTitle>
             <DialogDescription>
-              {step === 1 && "অ্যাকাউন্ট তথ্য পূরণ করুন"}
-              {step === 2 && "প্রোফাইল তথ্য পূরণ করুন"}
-              {step === 3 && "সময়সূচী সেট করুন"}
+              {step === 1 && t("doctor.accountInfo")}
+              {step === 2 && t("doctor.profileInfo")}
+              {step === 3 && t("doctor.scheduleSet")}
             </DialogDescription>
           </DialogHeader>
 
@@ -389,16 +391,16 @@ export default function AdminDoctorsPage() {
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label>নাম *</Label>
-                    <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="ডাক্তারের নাম" />
+                    <Label>{t("common.name")} *</Label>
+                    <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("common.name")} />
                   </div>
                   <div>
-                    <Label>ফোন *</Label>
+                    <Label>{t("common.phone")} *</Label>
                     <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="০১XXXXXXXXX" />
                   </div>
                 </div>
                 <div>
-                  <Label>ইমেইল *</Label>
+                  <Label>{t("common.email")} *</Label>
                   <Input
                     type="email"
                     value={form.email}
@@ -410,7 +412,7 @@ export default function AdminDoctorsPage() {
                 {!editDoctor && (
                   <div>
                     <div className="flex items-center gap-2">
-                      <Label>পাসওয়ার্ড *</Label>
+                      <Label>{t("doctor.passwordLabel")} *</Label>
                       <label className="flex items-center gap-1 text-xs text-muted-foreground">
                         <input
                           type="checkbox"
@@ -423,14 +425,14 @@ export default function AdminDoctorsPage() {
                             })
                           }
                         />
-                        অটো-জেনারেট
+                        {t("doctor.autoPassword")}
                       </label>
                     </div>
                     <Input
                       type="text"
                       value={form.password}
                       onChange={(e) => setForm({ ...form, password: e.target.value, autoPassword: false })}
-                      placeholder="পাসওয়ার্ড"
+                      placeholder={t("auth.passwordPlaceholder")}
                       readOnly={form.autoPassword}
                     />
                   </div>
@@ -443,11 +445,11 @@ export default function AdminDoctorsPage() {
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label>বিশেষজ্ঞতা *</Label>
+                    <Label>{t("doctor.speciality")} *</Label>
                     <Input value={form.speciality} onChange={(e) => setForm({ ...form, speciality: e.target.value })} placeholder="যেমন: কার্ডিওলজি" />
                   </div>
                   <div>
-                    <Label>ডিগ্রি *</Label>
+                    <Label>{t("doctor.degree")} *</Label>
                     <div className="flex flex-wrap gap-1 mb-1">
                       {form.degree.map((d, i) => (
                         <span key={i} className="inline-flex items-center gap-1 rounded bg-muted px-2 py-0.5 text-xs">
@@ -459,7 +461,7 @@ export default function AdminDoctorsPage() {
                     <div className="flex gap-1">
                       <Input
                         id="degree-input"
-                        placeholder="ডিগ্রি লিখে Enter চাপুন"
+                        placeholder={t("doctor.degreePlaceholder")}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
@@ -476,25 +478,25 @@ export default function AdminDoctorsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label>ভিজিট ফি (৳) *</Label>
+                    <Label>{t("doctor.visitFee")} (৳) *</Label>
                     <Input type="number" value={form.visitFee} onChange={(e) => setForm({ ...form, visitFee: Number(e.target.value) })} />
                   </div>
                   <div>
-                    <Label>ফলো-আপ ফি (৳) *</Label>
+                    <Label>{t("doctor.followUpFee")} (৳) *</Label>
                     <Input type="number" value={form.followUpFee} onChange={(e) => setForm({ ...form, followUpFee: Number(e.target.value) })} />
                   </div>
                 </div>
                 <div>
-                  <Label>বায়ো</Label>
-                  <Input value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} placeholder="সংক্ষিপ্ত পরিচিতি" />
+                  <Label>{t("doctor.bio")}</Label>
+                  <Input value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} placeholder={t("doctor.bioPlaceholder")} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label>চেম্বার ঠিকানা</Label>
+                    <Label>{t("doctor.chamberAddress")}</Label>
                     <Input value={form.chamberAddress} onChange={(e) => setForm({ ...form, chamberAddress: e.target.value })} />
                   </div>
                   <div>
-                    <Label>চেম্বার ফোন</Label>
+                    <Label>{t("doctor.chamberPhone")}</Label>
                     <Input value={form.chamberPhone} onChange={(e) => setForm({ ...form, chamberPhone: e.target.value })} />
                   </div>
                 </div>
@@ -525,22 +527,22 @@ export default function AdminDoctorsPage() {
                   <div key={slot.day} className="grid grid-cols-4 gap-2 rounded border p-3">
                     <div className="col-span-4 font-medium text-sm">{DAY_LABELS[slot.day]}</div>
                     <div>
-                      <Label className="text-xs">শুরুর সময়</Label>
+                      <Label className="text-xs">{t("doctor.startTime")}</Label>
                       <Input type="time" value={slot.startTime} onChange={(e) => updateSchedule(slot.day, "startTime", e.target.value)} />
                     </div>
                     <div>
-                      <Label className="text-xs">শেষ সময়</Label>
+                      <Label className="text-xs">{t("doctor.endTime")}</Label>
                       <Input type="time" value={slot.endTime} onChange={(e) => updateSchedule(slot.day, "endTime", e.target.value)} />
                     </div>
                     <div>
-                      <Label className="text-xs">সর্বোচ্চ রোগী</Label>
+                      <Label className="text-xs">{t("doctor.maxPatients")}</Label>
                       <Input type="number" min={1} value={slot.maxPatients} onChange={(e) => updateSchedule(slot.day, "maxPatients", Number(e.target.value))} />
                     </div>
                   </div>
                 ))}
                 {form.schedule.length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    উপরের দিন থেকে সক্রিয় দিন নির্বাচন করুন
+                    {t("doctor.selectDays")}
                   </p>
                 )}
               </div>
@@ -549,7 +551,7 @@ export default function AdminDoctorsPage() {
 
           <DialogFooter>
             {step > 1 && (
-              <Button variant="outline" onClick={() => setStep(step - 1)}>পূর্ববর্তী</Button>
+              <Button variant="outline" onClick={() => setStep(step - 1)}>{t("common.previous")}</Button>
             )}
             {step < 3 ? (
               <Button
@@ -559,13 +561,13 @@ export default function AdminDoctorsPage() {
                   (step === 2 && (!form.speciality || form.degree.filter(Boolean).length === 0))
                 }
               >
-                পরবর্তী
+                {t("common.next")}
               </Button>
             ) : (
               <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
                 {createMutation.isPending || updateMutation.isPending
-                  ? "প্রক্রিয়াধীন..."
-                  : editDoctor ? "আপডেট করুন" : "যোগ করুন"}
+                  ? t("common.processing")
+                  : editDoctor ? t("doctor.update") : t("doctor.addUpdate")}
               </Button>
             )}
           </DialogFooter>

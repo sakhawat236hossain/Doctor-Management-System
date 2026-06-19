@@ -7,6 +7,7 @@ import { RoleGuard } from "@/components/shared/RoleGuard";
 import { LiveQueueWidget } from "@/components/patient/LiveQueueWidget";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useT } from "@/lib/i18n";
 import {
   CalendarPlus,
   History,
@@ -29,26 +30,27 @@ interface UpcomingAppointment {
   };
 }
 
-const statusBadge = (status: string) => {
+function StatusBadge({ status, t }: { status: string; t: (key: string) => string }) {
   switch (status) {
     case "confirmed":
-      return <Badge variant="secondary">নিশ্চিত</Badge>;
+      return <Badge variant="secondary">{t("status.confirmed")}</Badge>;
     case "serving":
-      return <Badge className="bg-blue-100 text-blue-800">চলমান</Badge>;
+      return <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">{t("status.serving")}</Badge>;
     case "completed":
-      return <Badge variant="success">সম্পন্ন</Badge>;
+      return <Badge variant="success">{t("status.completed")}</Badge>;
     case "cancelled":
-      return <Badge variant="destructive">বাতিল</Badge>;
+      return <Badge variant="destructive">{t("status.cancelled")}</Badge>;
     case "no-show":
-      return <Badge variant="outline">No-Show</Badge>;
+      return <Badge variant="outline">{t("status.noShow")}</Badge>;
     default:
       return <Badge variant="outline">{status}</Badge>;
   }
-};
+}
 
 function PatientDashboardContent() {
+  const t = useT();
   const { session } = useAuth();
-  const userName = session?.user?.name || "রোগী";
+  const userName = session?.user?.name || t("roles.patient");
 
   const [upcoming, setUpcoming] = useState<UpcomingAppointment | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,7 +65,6 @@ function PatientDashboardContent() {
       .then((res) => {
         if (res.success && Array.isArray(res.data)) {
           const now = new Date();
-          // Find next upcoming (confirmed/serving) appointment
           const next = res.data.find(
             (a: UpcomingAppointment) =>
               ["confirmed", "serving", "pending"].includes(a.status) &&
@@ -83,24 +84,24 @@ function PatientDashboardContent() {
   const quickLinks = [
     {
       href: "/patient/doctors",
-      label: "নতুন বুকিং",
+      label: t("appointment.newBooking"),
       icon: CalendarPlus,
-      color: "text-blue-600",
-      bg: "bg-blue-50",
+      color: "text-blue-600 dark:text-blue-400",
+      bg: "bg-blue-50 dark:bg-blue-900/30",
     },
     {
       href: "/patient/appointments",
-      label: "ইতিহাস",
+      label: t("appointment.history"),
       icon: History,
-      color: "text-teal-600",
-      bg: "bg-teal-50",
+      color: "text-teal-600 dark:text-teal-400",
+      bg: "bg-teal-50 dark:bg-teal-900/30",
     },
     {
       href: "/patient/doctors",
-      label: "ডাক্তার খুঁজুন",
+      label: t("doctor.findDoctor"),
       icon: Search,
-      color: "text-purple-600",
-      bg: "bg-purple-50",
+      color: "text-purple-600 dark:text-purple-400",
+      bg: "bg-purple-50 dark:bg-purple-900/30",
     },
   ];
 
@@ -108,11 +109,11 @@ function PatientDashboardContent() {
     <div className="space-y-6">
       {/* Welcome */}
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-          স্বাগতম, {userName}!
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+          {t("patient.welcome", { name: userName })}
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
-          {new Date().toLocaleDateString("en-GB", {
+        <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
+          {new Date().toLocaleDateString("bn-BD", {
             weekday: "long",
             day: "numeric",
             month: "long",
@@ -123,46 +124,45 @@ function PatientDashboardContent() {
 
       {/* Upcoming Appointment Card */}
       {loading ? (
-        <Card>
-          <CardContent className="p-6 text-center text-gray-400">
-            <Clock className="h-8 w-8 mx-auto mb-2 text-gray-300 animate-pulse" />
-            <p className="text-sm">Loading appointments...</p>
+        <Card className="dark:bg-slate-800 dark:border-slate-700">
+          <CardContent className="p-6 text-center text-gray-400 dark:text-slate-500">
+            <Clock className="h-8 w-8 mx-auto mb-2 text-gray-300 dark:text-slate-600 animate-pulse" />
+            <p className="text-sm">{t("common.loading")}</p>
           </CardContent>
         </Card>
       ) : upcoming ? (
-        <Card className="border-blue-200">
+        <Card className="border-blue-200 dark:border-blue-800 dark:bg-slate-800">
           <CardContent className="p-5 space-y-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs text-gray-500 font-medium mb-1">
-                  পরবর্তী অ্যাপয়েন্টমেন্ট
+                <p className="text-xs text-gray-500 dark:text-slate-400 font-medium mb-1">
+                  {t("appointment.upcomingAppointment")}
                 </p>
-                <p className="text-lg font-bold text-gray-900">
-                  Dr. {upcoming.doctorId?.userId?.name || "Unknown"}
+                <p className="text-lg font-bold text-gray-900 dark:text-white">
+                  Dr. {upcoming.doctorId?.userId?.name || t("common.unknown")}
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-slate-400">
                   {upcoming.doctorId?.speciality}
                 </p>
               </div>
-              {statusBadge(upcoming.status)}
+              <StatusBadge status={upcoming.status} t={t} />
             </div>
 
             <div className="flex flex-wrap gap-4 text-sm">
-              <div className="flex items-center gap-1.5 text-gray-600">
+              <div className="flex items-center gap-1.5 text-gray-600 dark:text-slate-300">
                 <Calendar className="h-4 w-4" />
-                {new Date(upcoming.appointmentDate).toLocaleDateString("en-GB", {
+                {new Date(upcoming.appointmentDate).toLocaleDateString("bn-BD", {
                   day: "2-digit",
                   month: "short",
                   year: "numeric",
                 })}
               </div>
-              <div className="flex items-center gap-1.5 text-gray-600">
+              <div className="flex items-center gap-1.5 text-gray-600 dark:text-slate-300">
                 <CheckCircle2 className="h-4 w-4" />
-                Serial #{upcoming.serialNumber}
+                {t("appointment.serial")} #{upcoming.serialNumber}
               </div>
             </div>
 
-            {/* Live Queue Widget for today's appointment */}
             {isTodayAppointment && upcoming.doctorId?._id && (
               <LiveQueueWidget
                 doctorId={upcoming.doctorId._id}
@@ -172,25 +172,25 @@ function PatientDashboardContent() {
 
             <Link
               href={`/patient/appointments/${upcoming._id}`}
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
             >
-              বিস্তারিত দেখুন →
+              {t("common.viewDetails")} →
             </Link>
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="dark:bg-slate-800 dark:border-slate-700">
           <CardContent className="p-8 text-center">
-            <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-            <p className="text-gray-500 mb-3">
-              কোনো আসন্ন অ্যাপয়েন্টমেন্ট নেই
+            <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-slate-600" />
+            <p className="text-gray-500 dark:text-slate-400 mb-3">
+              {t("appointment.noUpcoming")}
             </p>
             <Link
               href="/patient/doctors"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-800"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
             >
               <CalendarPlus className="h-4 w-4" />
-              নতুন বুকিং করুন
+              {t("appointment.bookNow")}
             </Link>
           </CardContent>
         </Card>
@@ -200,14 +200,14 @@ function PatientDashboardContent() {
       <div className="grid grid-cols-3 gap-3">
         {quickLinks.map((link) => (
           <Link key={link.label} href={link.href}>
-            <Card className="hover:shadow-md transition-shadow h-full">
+            <Card className="hover:shadow-md transition-shadow h-full dark:bg-slate-800 dark:border-slate-700">
               <CardContent className="p-4 flex flex-col items-center text-center gap-2">
                 <div
                   className={`h-10 w-10 rounded-full ${link.bg} flex items-center justify-center`}
                 >
                   <link.icon className={`h-5 w-5 ${link.color}`} />
                 </div>
-                <p className="text-xs font-medium text-gray-700">
+                <p className="text-xs font-medium text-gray-700 dark:text-slate-300">
                   {link.label}
                 </p>
               </CardContent>

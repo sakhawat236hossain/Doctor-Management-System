@@ -14,8 +14,11 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loading } from "@/components/shared/Loading";
+import { useT } from "@/lib/i18n";
 
 export function AdminCharts() {
+  const t = useT();
+
   const { data: appointmentData, isLoading: appointmentsLoading } = useQuery({
     queryKey: ["reports-appointments"],
     queryFn: async () => {
@@ -35,7 +38,7 @@ export function AdminCharts() {
   });
 
   if (appointmentsLoading || revenueLoading) {
-    return <Loading message="Loading charts..." />;
+    return <Loading message={t("common.loading")} />;
   }
 
   const appointments = (appointmentData || []).map((item: { _id: string; count: number }) => ({
@@ -50,20 +53,20 @@ export function AdminCharts() {
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Card>
+      <Card className="dark:bg-slate-800 dark:border-slate-700">
         <CardHeader>
-          <CardTitle className="text-base">Appointments Trend</CardTitle>
+          <CardTitle className="text-base dark:text-white">{t("admin.appointmentsTrend")}</CardTitle>
         </CardHeader>
         <CardContent>
           {appointments.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">No appointment data available</p>
+            <p className="py-8 text-center text-sm text-muted-foreground dark:text-slate-400">{t("admin.noAppointmentData")}</p>
           ) : (
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={appointments}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" fontSize={12} />
-                <YAxis fontSize={12} />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis dataKey="date" fontSize={12} tick={{ fill: "#94a3b8" }} />
+                <YAxis fontSize={12} tick={{ fill: "#94a3b8" }} />
+                <Tooltip contentStyle={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: "8px", color: "#fff" }} />
                 <Bar dataKey="appointments" fill="#2563eb" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -71,27 +74,27 @@ export function AdminCharts() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="dark:bg-slate-800 dark:border-slate-700">
         <CardHeader>
-          <CardTitle className="text-base">
-            Revenue Trend
+          <CardTitle className="text-base dark:text-white">
+            {t("admin.revenueTrend")}
             {revenueData?.total > 0 && (
-              <span className="ml-2 text-sm font-normal text-muted-foreground">
-                Total: ${revenueData.total.toFixed(2)}
+              <span className="ml-2 text-sm font-normal text-muted-foreground dark:text-slate-400">
+                {t("common.total")}: ৳{revenueData.total.toFixed(2)}
               </span>
             )}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {revenue.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">No revenue data available</p>
+            <p className="py-8 text-center text-sm text-muted-foreground dark:text-slate-400">{t("admin.noRevenueData")}</p>
           ) : (
             <ResponsiveContainer width="100%" height={250}>
               <LineChart data={revenue}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" fontSize={12} />
-                <YAxis fontSize={12} />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis dataKey="date" fontSize={12} tick={{ fill: "#94a3b8" }} />
+                <YAxis fontSize={12} tick={{ fill: "#94a3b8" }} />
+                <Tooltip contentStyle={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: "8px", color: "#fff" }} />
                 <Line type="monotone" dataKey="revenue" stroke="#14b8a6" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>

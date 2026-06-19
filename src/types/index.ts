@@ -100,6 +100,18 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
+export interface INotification {
+  _id?: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: "info" | "warning" | "success" | "alert";
+  isRead: boolean;
+  link?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export interface DashboardStats {
   totalPatients: number;
   totalDoctors: number;

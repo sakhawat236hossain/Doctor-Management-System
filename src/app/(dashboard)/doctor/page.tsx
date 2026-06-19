@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { connectSocket, disconnectSocket, SOCKET_EVENTS } from "@/lib/socket";
+import { useT } from "@/lib/i18n";
 import {
   Users,
   CheckCircle2,
@@ -35,6 +36,7 @@ interface AppointmentRow {
 }
 
 function DoctorDashboardContent() {
+  const t = useT();
   const { session } = useAuth();
   const [doctorId, setDoctorId] = useState("");
   const [appointments, setAppointments] = useState<AppointmentRow[]>([]);
@@ -71,7 +73,6 @@ function DoctorDashboardContent() {
     fetchData();
   }, [fetchData]);
 
-  // Fetch doctor ID if not yet known
   useEffect(() => {
     if (doctorId) return;
     fetch(`/api/doctors?search=${encodeURIComponent(session?.user?.name || "")}&limit=1`)
@@ -84,7 +85,6 @@ function DoctorDashboardContent() {
       .catch(() => {});
   }, [doctorId, session?.user?.name]);
 
-  // Socket.io listener
   useEffect(() => {
     if (!doctorId) return;
     let socket: Socket;
@@ -117,10 +117,10 @@ function DoctorDashboardContent() {
       if (data.success) {
         fetchData();
       } else {
-        alert(data.error || "Failed to advance queue");
+        alert(data.error || t("queue.queueFailed"));
       }
     } catch {
-      alert("Something went wrong");
+      alert(t("queue.somethingWrong"));
     } finally {
       setActionLoading(false);
     }
@@ -139,22 +139,19 @@ function DoctorDashboardContent() {
     }
   };
 
-  // Stats
   const total = appointments.filter(
     (a) => a.status !== "cancelled" && a.status !== "no-show"
   ).length;
   const completed = appointments.filter((a) => a.status === "completed").length;
   const remaining = total - completed - appointments.filter((a) => a.status === "serving").length;
   const serving = appointments.filter((a) => a.status === "serving")[0];
-
-  // Today's income estimate
-  const todayIncome = completed * 500; // placeholder — real calc from payments
+  const todayIncome = completed * 500;
 
   const statCards = [
-    { label: "আজকের রোগী", value: total, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
-    { label: "সম্পন্ন", value: completed, icon: CheckCircle2, color: "text-green-600", bg: "bg-green-50" },
-    { label: "বাকি", value: Math.max(0, remaining), icon: Clock, color: "text-amber-600", bg: "bg-amber-50" },
-    { label: "আজকের আয়", value: `৳${todayIncome.toLocaleString()}`, icon: Banknote, color: "text-teal-600", bg: "bg-teal-50" },
+    { label: t("doctor.todayPatients"), value: total, icon: Users, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/30" },
+    { label: t("status.completed"), value: completed, icon: CheckCircle2, color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/30" },
+    { label: t("admin.remaining"), value: Math.max(0, remaining), icon: Clock, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/30" },
+    { label: t("doctor.todayIncome"), value: `৳${todayIncome.toLocaleString()}`, icon: Banknote, color: "text-teal-600 dark:text-teal-400", bg: "bg-teal-50 dark:bg-teal-900/30" },
   ];
 
   if (loading) {
@@ -170,15 +167,15 @@ function DoctorDashboardContent() {
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statCards.map((stat) => (
-          <Card key={stat.label}>
+          <Card key={stat.label} className="dark:bg-slate-800 dark:border-slate-700">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className={`h-10 w-10 rounded-lg ${stat.bg} flex items-center justify-center`}>
                   <stat.icon className={`h-5 w-5 ${stat.color}`} />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">{stat.label}</p>
-                  <p className="text-xl font-bold text-gray-900">{stat.value}</p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400">{stat.label}</p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
                 </div>
               </div>
             </CardContent>
@@ -187,19 +184,19 @@ function DoctorDashboardContent() {
       </div>
 
       {/* Next Patient Card */}
-      <Card className="border-blue-200 bg-blue-50/30">
+      <Card className="border-blue-200 bg-blue-50/30 dark:bg-blue-900/20 dark:border-blue-800">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 mb-1">এখন চলছে — Current Serial</p>
-              <p className="text-5xl font-bold text-blue-600">#{currentSerial}</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">{t("queue.currentlyServing")}</p>
+              <p className="text-5xl font-bold text-blue-600 dark:text-blue-400">#{currentSerial}</p>
               {serving && (
                 <div className="mt-2">
-                  <p className="text-sm font-medium text-gray-900">
-                    {serving.patientId?.userId?.name || "রোগী"}
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    {serving.patientId?.userId?.name || t("roles.patient")}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    {serving.type === "new" ? "নতুন রোগী" : "ফলো-আপ"}
+                  <p className="text-xs text-gray-500 dark:text-slate-400">
+                    {serving.type === "new" ? t("appointment.newVisit") : t("appointment.followUp")}
                     {serving.notes && ` · ${serving.notes}`}
                   </p>
                 </div>
@@ -212,17 +209,17 @@ function DoctorDashboardContent() {
                 className="bg-blue-600 hover:bg-blue-700 text-white h-12 px-6"
               >
                 <ChevronRight className="mr-2 h-5 w-5" />
-                পরবর্তী রোগী
+                {t("queue.nextPatient")}
               </Button>
               {serving && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleCompletePatient(serving._id)}
-                  className="text-green-600 border-green-300"
+                  className="text-green-600 border-green-300 dark:text-green-400 dark:border-green-700"
                 >
                   <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
-                  সম্পন্ন করুন
+                  {t("queue.completePatient")}
                 </Button>
               )}
             </div>
@@ -231,19 +228,19 @@ function DoctorDashboardContent() {
       </Card>
 
       {/* Quick Patient List */}
-      <Card>
+      <Card className="dark:bg-slate-800 dark:border-slate-700">
         <CardContent className="p-0">
-          <div className="p-4 border-b">
-            <h3 className="font-semibold text-gray-900">আজকের রোগীদের তালিকা</h3>
+          <div className="p-4 border-b dark:border-slate-700">
+            <h3 className="font-semibold text-gray-900 dark:text-white">{t("queue.todaysPatientList")}</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b bg-gray-50">
-                  <th className="text-left py-2.5 px-4 font-medium text-gray-500">Serial</th>
-                  <th className="text-left py-2.5 px-4 font-medium text-gray-500">নাম</th>
-                  <th className="text-left py-2.5 px-4 font-medium text-gray-500">ধরন</th>
-                  <th className="text-left py-2.5 px-4 font-medium text-gray-500">স্ট্যাটাস</th>
+                <tr className="border-b bg-gray-50 dark:bg-slate-900 dark:border-slate-700">
+                  <th className="text-left py-2.5 px-4 font-medium text-gray-500 dark:text-slate-400">{t("appointment.serial")}</th>
+                  <th className="text-left py-2.5 px-4 font-medium text-gray-500 dark:text-slate-400">{t("common.name")}</th>
+                  <th className="text-left py-2.5 px-4 font-medium text-gray-500 dark:text-slate-400">{t("common.type")}</th>
+                  <th className="text-left py-2.5 px-4 font-medium text-gray-500 dark:text-slate-400">{t("common.status")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -253,14 +250,14 @@ function DoctorDashboardContent() {
                   .map((apt) => (
                     <tr
                       key={apt._id}
-                      className={`border-b last:border-0 ${
-                        apt.status === "serving" ? "bg-blue-50" : ""
+                      className={`border-b last:border-0 dark:border-slate-700 ${
+                        apt.status === "serving" ? "bg-blue-50 dark:bg-blue-900/20" : ""
                       }`}
                     >
-                      <td className="py-2.5 px-4 font-bold">#{apt.serialNumber}</td>
-                      <td className="py-2.5 px-4">{apt.patientId?.userId?.name || "—"}</td>
-                      <td className="py-2.5 px-4">
-                        {apt.type === "new" ? "নতুন" : "ফলো-আপ"}
+                      <td className="py-2.5 px-4 font-bold dark:text-white">#{apt.serialNumber}</td>
+                      <td className="py-2.5 px-4 dark:text-slate-300">{apt.patientId?.userId?.name || "—"}</td>
+                      <td className="py-2.5 px-4 dark:text-slate-300">
+                        {apt.type === "new" ? t("appointment.newVisit") : t("appointment.followUp")}
                       </td>
                       <td className="py-2.5 px-4">
                         <Badge
@@ -272,15 +269,15 @@ function DoctorDashboardContent() {
                                 : "secondary"
                           }
                         >
-                          {apt.status}
+                          {t(`status.${apt.status}`)}
                         </Badge>
                       </td>
                     </tr>
                   ))}
                 {appointments.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="py-8 text-center text-gray-400">
-                      আজ কোনো রোগী নেই
+                    <td colSpan={4} className="py-8 text-center text-gray-400 dark:text-slate-500">
+                      {t("queue.noPatientsToday")}
                     </td>
                   </tr>
                 )}
