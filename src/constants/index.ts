@@ -74,27 +74,27 @@ export const GENDER = {
 
 export const NAV_LINKS = {
   admin: [
-    { href: "/admin", label: "Dashboard" },
-    { href: "/admin/doctors", label: "Doctors" },
-    { href: "/admin/patients", label: "Patients" },
-    { href: "/admin/reports", label: "Reports" },
+    { href: "/admin", label: "সারসংক্ষেপ" },
+    { href: "/admin/doctors", label: "ডাক্তার" },
+    { href: "/admin/receptionists", label: "রিসেপশনিস্ট" },
+    { href: "/admin/appointments", label: "অ্যাপয়েন্টমেন্ট" },
+    { href: "/admin/income", label: "আয়ের রিপোর্ট" },
   ],
   doctor: [
-    { href: "/doctor", label: "Dashboard" },
+    { href: "/doctor", label: "ড্যাশবোর্ড" },
     { href: "/doctor/patients", label: "আজকের রোগী" },
     { href: "/doctor/schedule", label: "আমার সময়সূচী" },
     { href: "/doctor/income", label: "আয়ের হিসাব" },
     { href: "/doctor/profile", label: "প্রোফাইল" },
   ],
   receptionist: [
-    { href: "/receptionist", label: "Dashboard" },
+    { href: "/receptionist", label: "ড্যাশবোর্ড" },
     { href: "/receptionist", label: "সিরিয়াল বুক করুন" },
-    { href: "/receptionist/queue", label: "Queue Manager" },
+    { href: "/receptionist/queue", label: "কিউ ম্যানেজার" },
     { href: "/receptionist/patients", label: "রোগী খুঁজুন" },
-    { href: "/receptionist/reports", label: "আজকের রিপোর্ট" },
   ],
   patient: [
-    { href: "/patient", label: "Dashboard" },
+    { href: "/patient", label: "ড্যাশবোর্ড" },
     { href: "/patient/appointments", label: "আমার অ্যাপয়েন্টমেন্ট" },
     { href: "/patient/doctors", label: "ডাক্তার খুঁজুন" },
     { href: "/patient/profile", label: "আমার প্রোফাইল" },
