@@ -7,13 +7,13 @@ const UserSchema = new Schema<IUserDocument>(
   {
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    password: { type: String, required: true, select: false },
+    password: { type: String, select: false, default: "" },
     role: {
       type: String,
       enum: ["admin", "doctor", "receptionist", "patient"],
       required: true,
     },
-    phone: { type: String, required: true, trim: true },
+    phone: { type: String, trim: true, default: "" },
     profileImage: { type: String, trim: true, default: "" },
     isActive: { type: Boolean, default: true },
   },

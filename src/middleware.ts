@@ -107,8 +107,7 @@ export default auth((req) => {
 
   // ── Redirect logged-in users from login/register ──
   if (session?.user && (pathname === "/login" || pathname === "/register")) {
-    const redirectPath = roleHomePaths[session.user.role] || "/";
-    return NextResponse.redirect(new URL(redirectPath, req.url));
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   return NextResponse.next();

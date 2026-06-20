@@ -87,7 +87,15 @@
     "passwordMinLength": "পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে",
     "nameMinLength": "নাম কমপক্ষে ২ অক্ষর হতে হবে",
     "invalidEmail": "সঠিক ইমেইল দিন",
-    "phoneMinLength": "ফোন কমপক্ষে ১০ অক্ষর হতে হবে"
+    "phoneMinLength": "ফোন কমপক্ষে ১০ অক্ষর হতে হবে",
+    "orDivider": "অথবা",
+    "loginWithGoogle": "Google দিয়ে লগইন করুন",
+    "loginWithFacebook": "Facebook দিয়ে লগইন করুন",
+    "noEmailError": "আপনার Facebook অ্যাকাউন্টে ইমেইল পাওয়া যায়নি। অনুগ্রহ করে ইমেইল সহ Facebook অনুমতি দিন।",
+    "oauthError": "সোশ্যাল লগইন করতে সমস্যা হয়েছে",
+    "loggingIn": "লগইন হচ্ছে...",
+    "goToDashboard": "ড্যাশবোর্ডে যান",
+    "profile": "প্রোফাইল"
   },
   "roles": {
     "admin": "অ্যাডমিন",

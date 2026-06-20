@@ -87,7 +87,15 @@
     "passwordMinLength": "Password must be at least 6 characters",
     "nameMinLength": "Name must be at least 2 characters",
     "invalidEmail": "Invalid email address",
-    "phoneMinLength": "Phone must be at least 10 characters"
+    "phoneMinLength": "Phone must be at least 10 characters",
+    "orDivider": "or",
+    "loginWithGoogle": "Login with Google",
+    "loginWithFacebook": "Login with Facebook",
+    "noEmailError": "No email found on your Facebook account. Please grant email permission to Facebook.",
+    "oauthError": "An error occurred during social login",
+    "loggingIn": "Logging in...",
+    "goToDashboard": "Go to Dashboard",
+    "profile": "Profile"
   },
   "roles": {
     "admin": "Admin",

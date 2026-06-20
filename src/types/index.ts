@@ -5,7 +5,7 @@ export interface IUser {
   name: string;
   email: string;
   role: UserRole;
-  phone: string;
+  phone?: string;
   isActive: boolean;
   password?: string;
   profileImage?: string;
