@@ -186,7 +186,7 @@ function PatientDashboardContent() {
               {t("appointment.noUpcoming")}
             </p>
             <Link
-              href="/patient/doctors"
+              href="/doctors"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
             >
               <CalendarPlus className="h-4 w-4" />

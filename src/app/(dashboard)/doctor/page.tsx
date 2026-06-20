@@ -43,6 +43,8 @@ function DoctorDashboardContent() {
   const [currentSerial, setCurrentSerial] = useState(0);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [todayTotalIncome, setTodayTotalIncome] = useState(0);
+  const [todayCollected, setTodayCollected] = useState(0);
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -68,6 +70,22 @@ function DoctorDashboardContent() {
       setLoading(false);
     }
   }, [today, doctorId]);
+
+  // Fetch real income data from Payment records via reports API
+  useEffect(() => {
+    if (!doctorId) return;
+    let cancelled = false;
+    fetch(`/api/reports/doctor?doctorId=${doctorId}&startDate=${today}&endDate=${today}`)
+      .then((r) => r.json())
+      .then((res) => {
+        if (!cancelled && res.success && res.data?.summary) {
+          setTodayTotalIncome(res.data.summary.total || 0);
+          setTodayCollected(res.data.summary.paid || 0);
+        }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [doctorId, today]);
 
   useEffect(() => {
     fetchData();
@@ -145,13 +163,13 @@ function DoctorDashboardContent() {
   const completed = appointments.filter((a) => a.status === "completed").length;
   const remaining = total - completed - appointments.filter((a) => a.status === "serving").length;
   const serving = appointments.filter((a) => a.status === "serving")[0];
-  const todayIncome = completed * 500;
 
   const statCards = [
     { label: t("doctor.todayPatients"), value: total, icon: Users, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/30" },
     { label: t("status.completed"), value: completed, icon: CheckCircle2, color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/30" },
     { label: t("admin.remaining"), value: Math.max(0, remaining), icon: Clock, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/30" },
-    { label: t("doctor.todayIncome"), value: `৳${todayIncome.toLocaleString()}`, icon: Banknote, color: "text-teal-600 dark:text-teal-400", bg: "bg-teal-50 dark:bg-teal-900/30" },
+    { label: t("doctor.todayIncome"), value: `৳${todayTotalIncome.toLocaleString()}`, icon: Banknote, color: "text-teal-600 dark:text-teal-400", bg: "bg-teal-50 dark:bg-teal-900/30" },
+    { label: "সংগৃহীত", value: `৳${todayCollected.toLocaleString()}`, icon: Banknote, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/30" },
   ];
 
   if (loading) {

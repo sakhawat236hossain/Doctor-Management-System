@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import type { UserRole } from "@/types";
 
@@ -31,4 +32,23 @@ export async function requireRole(allowedRoles: UserRole[]) {
   }
 
   return { error: null, session };
+}
+
+/**
+ * Server-side role guard for layout / page components.
+ * Redirects to /login if no session, or /unauthorized if role mismatch.
+ * Returns the session if authorised.
+ */
+export async function requireRolePage(allowedRoles: UserRole[]) {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  if (!allowedRoles.includes(session.user.role)) {
+    redirect("/unauthorized");
+  }
+
+  return session;
 }
