@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db";
 import { UserModel } from "@/models/User";
 import { PatientModel } from "@/models/Patient";
-import { DoctorModel } from "@/models/Doctor";
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,19 +13,12 @@ export async function POST(request: NextRequest) {
       email,
       password,
       phone,
-      role = "patient",
       profileImage,
       dateOfBirth,
       gender,
       bloodGroup,
       address,
       emergencyContact,
-      speciality,
-      degree,
-      visitFee,
-      followUpFee,
-      chamberAddress,
-      chamberPhone,
     } = body;
 
     if (!name || !email || !password || !phone) {
@@ -51,39 +43,19 @@ export async function POST(request: NextRequest) {
       email,
       password: hashedPassword,
       phone,
-      role: role || "patient",
+      role: "patient",
       profileImage: profileImage || "",
       isActive: true,
     });
 
-    if (role === "patient") {
-      await PatientModel.create({
-        userId: user._id,
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
-        gender: gender || "male",
-        bloodGroup: bloodGroup || "O+",
-        address: address || "",
-        emergencyContact: emergencyContact || "",
-      });
-    }
-
-    if (role === "doctor") {
-      await DoctorModel.create({
-        userId: user._id,
-        speciality: speciality || "",
-        degree: degree ? (Array.isArray(degree) ? degree : [degree]) : [],
-        bio: body.bio || "",
-        profileImage: profileImage || "",
-        visitFee: visitFee || 0,
-        followUpFee: followUpFee || 0,
-        chamberAddress: chamberAddress || "",
-        chamberPhone: chamberPhone || "",
-        schedule: [],
-        offDays: [],
-        status: "available",
-        isActive: true,
-      });
-    }
+    await PatientModel.create({
+      userId: user._id,
+      dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
+      gender: gender || "male",
+      bloodGroup: bloodGroup || "O+",
+      address: address || "",
+      emergencyContact: emergencyContact || "",
+    });
 
     return NextResponse.json({
       success: true,
