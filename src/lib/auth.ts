@@ -92,6 +92,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       const existingUser = await UserModel.findOne({ email });
 
       if (existingUser) {
+        // Check if account is deactivated
+        if (!existingUser.isActive) {
+          return "/login?error=AccountDeactivated";
+        }
+
         // Link accounts — use existing user data
         const ext = user as unknown as ExtendedUser;
         ext.id = existingUser._id.toString();
@@ -99,6 +104,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         ext.email = existingUser.email;
         ext.role = existingUser.role;
         ext.image = existingUser.profileImage || null;
+
+        // Track this provider in authProviders if not already present
+        const provider = account?.provider || "";
+        if (provider && !existingUser.authProviders?.includes(provider)) {
+          await UserModel.updateOne(
+            { _id: existingUser._id },
+            { $addToSet: { authProviders: provider } }
+          );
+        }
+
         return true;
       }
 
@@ -111,6 +126,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         phone: "",
         profileImage: user.image || "",
         isActive: true,
+        authProviders: [account?.provider || "google"],
       });
 
       // Create a skeleton Patient document (user fills details later)

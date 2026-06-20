@@ -78,6 +78,7 @@ export const NAV_LINKS = {
     { href: "/admin/doctors", labelKey: "nav.doctors" },
     { href: "/admin/receptionists", labelKey: "nav.receptionists" },
     { href: "/admin/appointments", labelKey: "nav.appointments" },
+    { href: "/admin/users", labelKey: "nav.users" },
     { href: "/admin/income", labelKey: "nav.incomeReport" },
   ],
   doctor: [

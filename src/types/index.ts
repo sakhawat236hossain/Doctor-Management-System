@@ -9,6 +9,7 @@ export interface IUser {
   isActive: boolean;
   password?: string;
   profileImage?: string;
+  authProviders: string[];
   createdAt?: Date;
   updatedAt?: Date;
 }

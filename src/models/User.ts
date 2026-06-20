@@ -16,6 +16,7 @@ const UserSchema = new Schema<IUserDocument>(
     phone: { type: String, trim: true, default: "" },
     profileImage: { type: String, trim: true, default: "" },
     isActive: { type: Boolean, default: true },
+    authProviders: [{ type: String, enum: ["credentials", "google", "facebook"], default: ["credentials"] }],
   },
   { timestamps: true }
 );
