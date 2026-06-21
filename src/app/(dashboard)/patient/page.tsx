@@ -83,7 +83,7 @@ function PatientDashboardContent() {
 
   const quickLinks = [
     {
-      href: "/patient/doctors",
+      href: "/doctors",
       label: t("appointment.newBooking"),
       icon: CalendarPlus,
       color: "text-blue-600 dark:text-blue-400",
@@ -97,7 +97,7 @@ function PatientDashboardContent() {
       bg: "bg-teal-50 dark:bg-teal-900/30",
     },
     {
-      href: "/patient/doctors",
+      href: "/doctors",
       label: t("doctor.findDoctor"),
       icon: Search,
       color: "text-purple-600 dark:text-purple-400",
